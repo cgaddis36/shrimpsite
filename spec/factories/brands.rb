@@ -1,5 +1,5 @@
 FactoryBot.define do
   factory :brand do
-    name { "MyString" }
+    name { Faker::Creature::Animal.unique.name.capitalize }
   end
 end
