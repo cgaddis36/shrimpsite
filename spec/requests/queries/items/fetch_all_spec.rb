@@ -17,14 +17,30 @@ RSpec.describe "It returns all Items in the database", type: :request do
       @items = Item.all
     end 
   end 
-  describe "Item database retrieval" do 
-    it "Succesfully returns all Items" do 
-  
+
+  describe  "Item database retrieval" do 
+    it "Successfully returns all Items" do 
+      post '/graphql', params: { query: query_string }
+      expect(response).to be_successful
+      reply = JSON.parse(response.body, symbolize_names: true)
+
+      data = reply[:data]
+      response_objects = data[:fetchAllItems]
+
+      expect(response_objects.count).to eq(@items.count)
     end 
     it "It gracefully raises errors when incorrect fields are called" do 
-      
+      post "/graphql", params: { query: incorrect_query_string }
+      expect(response).to be_successful
+      reply = JSON.parse(response.body, symbolize_names: true)
+
+      errors = reply[:errors]
+
+      expect(errors.count).to eq(2)
+      expect(errors[0][:message]).to eq("Field 'brands' doesn't exist on type 'Item'")
+      expect(errors[1][:message]).to eq("Field 'categories' doesn't exist on type 'Item'")
     end 
-  end
+  end 
   def query_string
     <<~GQL
       query {
@@ -43,5 +59,18 @@ RSpec.describe "It returns all Items in the database", type: :request do
       }
     GQL
   end 
+  def incorrect_query_string
+    <<~GQL
+      query {
+        fetchAllItems {
+          name 
+          price 
+          quantity
+          brands
+          categories
+        }
+      }
+    GQL
+  end 
   Faker::UniqueGenerator.clear
-end
+end 
