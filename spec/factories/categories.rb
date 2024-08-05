@@ -1,5 +1,5 @@
 FactoryBot.define do
   factory :category do
-    title { "MyString" }
+    title { Faker::Fantasy::Tolkien.unique.location.capitalize }
   end
 end
